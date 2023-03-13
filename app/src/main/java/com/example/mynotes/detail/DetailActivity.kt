@@ -1,13 +1,24 @@
-package com.example.mynotes
+package com.example.mynotes.detail
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.mynotes.Note
+import com.example.mynotes.NotesApplication
 import com.example.mynotes.databinding.ActivityDetailBinding
 import kotlinx.coroutines.launch
 
 class DetailActivity : AppCompatActivity() {
+
+    private val vm : DetailViewModel by viewModels{
+        val database = (application as NotesApplication).notesDatabase
+        val noteId = intent.getIntExtra(EXTRA_NOTE_ID, 0)
+        DetailViewModelFactory(database, noteId)
+    }
 
     companion object {
         const val EXTRA_NOTE_ID = "note_id"
@@ -24,28 +35,21 @@ class DetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
             ActivityDetailBinding.inflate(layoutInflater).apply {
             setContentView(root)
-            lifecycleScope.launch {
-                val database = (application as NotesApplication).notesDatabase
-                val note = database.notesDao().getById(intent.getIntExtra(EXTRA_NOTE_ID, -1))
-                if (note != null) {
-                    editTextTitle.setText(note.title)
-                    editTextDescription.setText(note.description)
-                }
-
                 buttonSave.setOnClickListener {
                     val title = editTextTitle.text.toString()
                     val description = editTextDescription.text.toString()
-                    lifecycleScope.launch{
-                        if (note != null){
-                            database.notesDao()
-                                .update(note.copy(title = title, description = description))
-                        } else {
-                            database.notesDao()
-                                .insert(Note(0,title = title, description = description))
-                        }
-                        finish()
+                    vm.save(title, description)
+                    finish()
+                }
+
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED){
+                    vm.state.collect{
+                        editTextTitle.setText(it.title)
+                        editTextDescription.setText(it.description)
                     }
                 }
+
             }
         }
     }
