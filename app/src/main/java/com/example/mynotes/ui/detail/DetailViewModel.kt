@@ -1,24 +1,37 @@
-package com.example.mynotes.detail
+package com.example.mynotes.ui.detail
 
+
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+
 import androidx.lifecycle.viewModelScope
 import com.example.mynotes.Note
-import com.example.mynotes.NotesDatabase
+
+import com.example.mynotes.domain.GetNoteByIdUseCase
+import com.example.mynotes.domain.SaveNoteUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class DetailViewModel(private val database:NotesDatabase,private val noteId: Int ) :
+@HiltViewModel
+class DetailViewModel @Inject constructor(
+    private val getNoteByIdUseCase: GetNoteByIdUseCase,
+    private val saveNoteUseCase: SaveNoteUseCase,
+     savedStateHandle: SavedStateHandle
+    ) :
     ViewModel() {
 
     private val _state = MutableStateFlow(Note(0,"", ""))
     val state: StateFlow<Note> = _state.asStateFlow()
 
+    private val noteId = requireNotNull( savedStateHandle.get<Int>(DetailActivity.EXTRA_NOTE_ID))
+
     init{
         viewModelScope.launch {
-            val note = database.notesDao().getById(noteId)
+            val note = getNoteByIdUseCase(noteId)
             if (note != null){
                     _state.value = note
             }
@@ -28,13 +41,8 @@ class DetailViewModel(private val database:NotesDatabase,private val noteId: Int
     fun save(title: String,descrition: String){
         viewModelScope.launch {
             val note = _state.value.copy(title = title, description = descrition)
-            database.notesDao().insert(note)
+            saveNoteUseCase(note)
         }
     }
 }
 
-class DetailViewModelFactory(private val database:NotesDatabase,private val noteId: Int) : ViewModelProvider.Factory{
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return DetailViewModel(database,noteId) as T
-    }
-} // solo se crea la primera vez que se llama a la clase

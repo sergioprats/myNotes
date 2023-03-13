@@ -1,4 +1,4 @@
-package com.example.mynotes.detail
+package com.example.mynotes.ui.detail
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -7,21 +7,22 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.mynotes.Note
 import com.example.mynotes.NotesApplication
+import com.example.mynotes.data.NotesRespository
+import com.example.mynotes.data.NotesRoomDataSource
 import com.example.mynotes.databinding.ActivityDetailBinding
+import com.example.mynotes.domain.GetNoteByIdUseCase
+import com.example.mynotes.domain.SaveNoteUseCase
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class DetailActivity : AppCompatActivity() {
 
-    private val vm : DetailViewModel by viewModels{
-        val database = (application as NotesApplication).notesDatabase
-        val noteId = intent.getIntExtra(EXTRA_NOTE_ID, 0)
-        DetailViewModelFactory(database, noteId)
-    }
+    private val vm : DetailViewModel by viewModels()
 
     companion object {
-        const val EXTRA_NOTE_ID = "note_id"
+         const val EXTRA_NOTE_ID = "note_id"
 
         fun navigate(activity: AppCompatActivity, noteId: Int = -1) {
             val intent = Intent(activity, DetailActivity::class.java).apply {

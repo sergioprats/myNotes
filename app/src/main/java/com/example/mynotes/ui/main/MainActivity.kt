@@ -1,4 +1,4 @@
-package com.example.mynotes.main
+package com.example.mynotes.ui.main
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -7,22 +7,24 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.mynotes.*
+import com.example.mynotes.data.NotesRespository
+import com.example.mynotes.data.NotesRoomDataSource
 import com.example.mynotes.databinding.ActivityMainBinding
-import com.example.mynotes.detail.DetailActivity
+import com.example.mynotes.domain.DeleteNoteUsesCase
+import com.example.mynotes.domain.GetCurrentNoteUseCase
+import com.example.mynotes.ui.detail.DetailActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var notesAdapter : NotesAdapter
 
     //acceso al viewmodel
-    private val vm by viewModels<MainViewModel>{
-        MainViewModelFactory(
-            (application as NotesApplication).notesDatabase
-        )
-    }
+    private val vm by viewModels<MainViewModel>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
