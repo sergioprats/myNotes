@@ -8,13 +8,13 @@ class NotesRespository @Inject constructor(private val noteDataSource: NotesLoca
 
     val currentNotes: Flow<List<Note>> = noteDataSource.currentNotes
 
-    suspend  fun delete (note: Note){
+    suspend fun delete (note: Note){
         noteDataSource.delete(note)
     }
 
     suspend fun getById(noteId: Int): Note? = noteDataSource.getById(noteId)
 
-    fun save(note: Note) {
+    suspend  fun save(note: Note) {
         noteDataSource.save(note)
     }
 
