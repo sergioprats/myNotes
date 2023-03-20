@@ -22,7 +22,7 @@ object AppModule {
             app,
             NotesDatabase::class.java,
         "notes.db"
-    ).build()
+    ).allowMainThreadQueries().build()
 
     @Provides
     fun provideNotesDao(db:NotesDatabase) = db.notesDao()
